@@ -160,6 +160,7 @@ public class FloatingSearchView extends FrameLayout {
     private ImageView mLeftAction;
     private OnLeftMenuClickListener mOnMenuClickListener;
     private OnHomeActionClickListener mOnHomeActionClickListener;
+    private OnSearchInputClickListener mOnSearchInputClickListener;
     private ProgressBar mSearchProgress;
     private DrawerArrowDrawable mMenuBtnDrawable;
     private Drawable mIconBackArrow;
@@ -349,6 +350,15 @@ public class FloatingSearchView extends FrameLayout {
          * was clicked.
          */
         void onClearSearchClicked();
+    }
+
+    public interface OnSearchInputClickListener {
+
+        /**
+         * Called when the clear search text button
+         * was clicked.
+         */
+        void onSearchInputClicked(String queryText);
     }
 
     public FloatingSearchView(Context context) {
@@ -669,6 +679,24 @@ public class FloatingSearchView extends FrameLayout {
                     setSearchText(getQuery());
                 }
                 setSearchFocusedInternal(false);
+            }
+        });
+
+        mSearchInput.setOnKeyboardDismissedListener(new SearchInputView.OnKeyboardDismissedListener() {
+            @Override
+            public void onKeyboardDismissed() {
+                if (mCloseSearchOnSofteKeyboardDismiss) {
+                    setSearchFocusedInternal(false);
+                }
+            }
+        });
+
+        mSearchInput.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnSearchInputClickListener != null) {
+                    mOnSearchInputClickListener.onSearchInputClicked(mSearchInput.getText().toString());
+                }
             }
         });
 
@@ -1735,6 +1763,19 @@ public class FloatingSearchView extends FrameLayout {
      */
     public void setOnClearSearchActionListener(OnClearSearchActionListener listener) {
         this.mOnClearSearchActionListener = listener;
+    }
+
+    /**
+     * Sets the listener that will be called when the input edittext
+     * is clicked, this also set Edittext.focusable to false,
+     * to stop edittext to gain focus and show keyboard
+     * @param listener
+     */
+    public void setOnSearchInputClickListener(OnSearchInputClickListener listener) {
+        this.mOnSearchInputClickListener = listener;
+        if (listener != null) {
+            mSearchInput.setFocusable(false);
+        }
     }
 
     private void openMenuDrawable(final DrawerArrowDrawable drawerArrowDrawable, boolean withAnim) {
